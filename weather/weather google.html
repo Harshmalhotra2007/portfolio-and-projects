@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Premium Weather Dashboard</title>
+  <!-- Google Fonts Outfit -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="theme-clear-day">
+  <!-- Live Weather Animation Overlays -->
+  <div id="weather-overlay" class="weather-overlay"></div>
+  <!-- Dynamic background overlay for transitions -->
+  <div class="bg-gradient-overlay"></div>
+  
+  <div class="dashboard-wrapper">
+    <!-- Top-Level Severe Weather Alert Banner -->
+    <div id="alert-banner" class="alert-banner hidden">
+      <div class="alert-content">
+        <i data-lucide="alert-triangle" class="alert-icon-main animate-pulse"></i>
+        <span id="alert-text">Severe Weather Advisory! Extreme wind speed detected.</span>
+      </div>
+      <button id="close-alert-btn" class="close-alert-btn">&times;</button>
+    </div>
+
+    <header class="app-header">
+      <div class="logo-area" style="display: flex; align-items: center; gap: 15px;">
+        <a href="../44010425029 personal porfolio/44010425029_WebPortfolio.html" class="back-link" style="text-decoration: none; color: inherit; display: inline-flex; align-items: center; font-weight: 500; font-size: 0.9rem; opacity: 0.8; transition: opacity 0.2s; margin-right: 10px;"><i data-lucide="arrow-left" style="margin-right: 5px; width: 16px; height: 16px;"></i> Portfolio</a>
+        <i data-lucide="cloud-sun" class="logo-icon"></i>
+        <h1>AetherWeather</h1>
+      </div>
+      <!-- Celsius/Fahrenheit toggle switch -->
+      <div class="unit-toggle-container">
+        <span class="unit-label">°C</span>
+        <label class="switch">
+          <input type="checkbox" id="unit-toggle">
+          <span class="slider round"></span>
+        </label>
+        <span class="unit-label">°F</span>
+      </div>
+    </header>
+
+    <main class="main-content">
+      <!-- Search & Geolocation Section -->
+      <section class="search-panel">
+        <div class="search-bar-container">
+          <div class="input-wrapper">
+            <i data-lucide="search" class="search-icon"></i>
+            <input type="text" id="city-input" placeholder="Search for a city..." autocomplete="off">
+            <!-- Autocomplete suggestions dropdown -->
+            <div id="suggestions-dropdown" class="suggestions-dropdown hidden"></div>
+          </div>
+          <button id="search-btn" class="btn-primary">Search</button>
+          <button id="location-btn" class="btn-secondary" title="Use current location">
+            <i data-lucide="map-pin" class="btn-icon"></i>
+          </button>
+        </div>
+
+        <!-- Search History Tags -->
+        <div class="history-tags-wrapper">
+          <div id="history-tags" class="history-tags"></div>
+          <button id="clear-history-btn" class="clear-history-btn hidden" title="Clear history">
+            <i data-lucide="trash-2"></i>
+          </button>
+        </div>
+      </section>
+
+      <!-- Inline Error message area -->
+      <div id="error-message" class="error-message-card hidden">
+        <i data-lucide="alert-circle" class="error-icon"></i>
+        <div class="error-details">
+          <h3>Location not found</h3>
+          <p>Please check the spelling and try again.</p>
+        </div>
+        <button id="close-error-btn" class="close-error-btn">&times;</button>
+      </div>
+
+      <!-- Two-Column Layout Container -->
+      <div class="columns-container">
+        
+        <!-- Left Column: Core Current weather + basic metrics -->
+        <div class="column-left">
+          
+          <!-- Main Weather Summary -->
+          <section id="weather-summary" class="summary-section">
+            <div class="summary-card">
+              <div class="summary-left">
+                <h2 id="city-name">Navi Mumbai</h2>
+                <p id="current-date">Monday, July 20</p>
+                <div class="weather-condition-text">
+                  <span id="weather-description">Partly Cloudy</span>
+                </div>
+              </div>
+              <div class="summary-right">
+                <div id="weather-icon-container" class="weather-icon-container">
+                  <i data-lucide="cloud-sun" class="main-weather-icon animate-float"></i>
+                </div>
+                <div class="temp-display">
+                  <span id="temperature">28</span><span class="degree-symbol">°</span>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Detailed Metrics Grid -->
+          <section class="details-section">
+            <div class="metrics-grid">
+              <!-- Feels Like -->
+              <div class="metric-card">
+                <div class="metric-header">
+                  <i data-lucide="thermometer" class="metric-icon color-temp"></i>
+                  <span class="metric-title">Feels Like</span>
+                </div>
+                <span id="feels-like" class="metric-value">30°</span>
+              </div>
+
+              <!-- Min / Max Temp -->
+              <div class="metric-card">
+                <div class="metric-header">
+                  <i data-lucide="arrow-up-down" class="metric-icon color-minmax"></i>
+                  <span class="metric-title">Min / Max</span>
+                </div>
+                <span id="temp-minmax" class="metric-value">25° / 31°</span>
+              </div>
+
+              <!-- Humidity (Clickable) -->
+              <div class="metric-card clickable" id="humidity-card" title="Click for Dew Point & Comfort details">
+                <div class="metric-header">
+                  <i data-lucide="droplets" class="metric-icon color-humidity"></i>
+                  <span class="metric-title">Humidity</span>
+                  <i data-lucide="maximize-2" class="expand-icon"></i>
+                </div>
+                <span id="humidity" class="metric-value">75%</span>
+              </div>
+
+              <!-- Wind Speed (Clickable) -->
+              <div class="metric-card clickable" id="wind-card" title="Click for Compass & Gust details">
+                <div class="metric-header">
+                  <i data-lucide="wind" class="metric-icon color-wind"></i>
+                  <span class="metric-title">Wind Speed</span>
+                  <i data-lucide="maximize-2" class="expand-icon"></i>
+                </div>
+                <span id="wind-speed" class="metric-value">12 km/h</span>
+              </div>
+
+              <!-- Barometric Pressure (Clickable) -->
+              <div class="metric-card clickable" id="pressure-card" title="Click for Barometer Gauge details">
+                <div class="metric-header">
+                  <i data-lucide="gauge" class="metric-icon color-pressure"></i>
+                  <span class="metric-title">Pressure</span>
+                  <i data-lucide="maximize-2" class="expand-icon"></i>
+                </div>
+                <span id="pressure" class="metric-value">1008 hPa</span>
+              </div>
+
+              <!-- Visibility -->
+              <div class="metric-card">
+                <div class="metric-header">
+                  <i data-lucide="eye" class="metric-icon color-visibility"></i>
+                  <span class="metric-title">Visibility</span>
+                </div>
+                <span id="visibility" class="metric-value">10 km</span>
+              </div>
+            </div>
+          </section>
+        </div> <!-- End of column-left -->
+
+        <!-- Right Column: Advanced Widgets (AQI, SVG Forecast, Sun progress) -->
+        <div class="column-right">
+          
+          <!-- Air Quality Index (AQI) (Clickable) -->
+          <section class="aqi-section">
+            <div class="dashboard-card aqi-card clickable" id="aqi-card" title="Click for chemical pollutants breakdown">
+              <div class="card-header">
+                <div class="title-wrapper">
+                  <i data-lucide="activity" class="card-header-icon color-aqi"></i>
+                  <h2>Air Quality Index</h2>
+                  <i data-lucide="maximize-2" class="expand-icon"></i>
+                </div>
+                <div class="aqi-badge-container">
+                  <span id="aqi-badge" class="aqi-badge level-1">Good</span>
+                </div>
+              </div>
+              <div class="aqi-body">
+                <div class="aqi-bar-container">
+                  <div class="aqi-scale-bar">
+                    <span id="aqi-indicator-dot" class="aqi-indicator-dot" style="left: 10%;"></span>
+                  </div>
+                  <div class="aqi-labels">
+                    <span>Good</span>
+                    <span>Poor</span>
+                  </div>
+                </div>
+                <div class="aqi-details">
+                  <p id="aqi-recommendation">Excellent air quality. Great day for outdoor activities.</p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Hourly Forecast Graph (SVG) -->
+          <section class="forecast-section">
+            <div class="dashboard-card forecast-card">
+              <div class="card-header">
+                <div class="title-wrapper">
+                  <i data-lucide="trending-up" class="card-header-icon color-forecast"></i>
+                  <h2>24-Hour Forecast</h2>
+                </div>
+              </div>
+              <div class="forecast-body">
+                <div class="chart-container">
+                  <svg id="forecast-svg" viewBox="0 0 500 160" preserveAspectRatio="none">
+                    <defs>
+                      <linearGradient id="chart-grad" x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stop-color="var(--accent-color)" stop-opacity="0.45"/>
+                        <stop offset="100%" stop-color="var(--accent-color)" stop-opacity="0.0"/>
+                      </linearGradient>
+                    </defs>
+                    <!-- Gradient Area Fill -->
+                    <path id="forecast-area-path" fill="url(#chart-grad)" d="" />
+                    <!-- Trend Line -->
+                    <path id="forecast-line-path" fill="none" stroke="var(--accent-color)" stroke-width="3" d="" />
+                    <!-- Data points (circles, temperatures, hours) injected via JS -->
+                    <g id="forecast-points-group"></g>
+                  </svg>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- Sunrise & Sunset Visual Progress Arc -->
+          <section class="sun-section">
+            <div class="dashboard-card sun-card">
+              <div class="card-header">
+                <div class="title-wrapper">
+                  <i data-lucide="sunset" class="card-header-icon color-sun"></i>
+                  <h2>Sunrise & Sunset</h2>
+                </div>
+              </div>
+              <div class="sun-body">
+                <div class="sun-arc-container">
+                  <svg id="sun-svg" viewBox="0 0 240 130">
+                    <!-- Background dashed path -->
+                    <path d="M 20,110 A 100,100 0 0,1 220,110" fill="none" stroke="rgba(255, 255, 255, 0.15)" stroke-width="3" stroke-dasharray="4 4" />
+                    <!-- Elapsed path (colored) -->
+                    <path id="sun-elapsed-path" d="" fill="none" stroke="var(--accent-color)" stroke-width="3" />
+                    <!-- Sun marker node -->
+                    <g id="sun-node-group">
+                      <circle id="sun-node" cx="20" cy="110" r="8" fill="#f1c40f" stroke="#ffffff" stroke-width="2" />
+                      <!-- Glowing ring -->
+                      <circle cx="20" cy="110" r="14" fill="none" stroke="#f1c40f" stroke-width="1" opacity="0.5" class="animate-ping-sun" />
+                    </g>
+                    <!-- Horizon baseline -->
+                    <line x1="10" y1="110" x2="230" y2="110" stroke="rgba(255, 255, 255, 0.25)" stroke-width="2" />
+                  </svg>
+                  <div class="sun-time-labels">
+                    <div class="time-block">
+                      <span class="label">Sunrise</span>
+                      <span id="sunrise-time" class="time-val">06:00 AM</span>
+                    </div>
+                    <div class="sun-status-text">
+                      <span id="sun-status-label" class="sun-status-label">Night</span>
+                    </div>
+                    <div class="time-block align-right">
+                      <span class="label">Sunset</span>
+                      <span id="sunset-time" class="time-val">06:30 PM</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+        </div> <!-- End of column-right -->
+      </div> <!-- End of columns-container -->
+    </main>
+  </div>
+
+  <!-- Premium Detail Modal Overlay -->
+  <div id="details-modal" class="modal-overlay hidden">
+    <div class="modal-card">
+      <button id="modal-close-btn" class="modal-close-btn" aria-label="Close modal">&times;</button>
+      <div id="modal-body" class="modal-body">
+        <!-- Dynamic detail parameters injected here -->
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
