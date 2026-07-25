@@ -3,7 +3,19 @@
 // ==========================================
 
 // 1. API Configuration
-const apiKey = "3ab3f0bc0835380f4d39c799a5c770cd"; 
+function getApiKey() {
+  let key = localStorage.getItem("openweather_api_key");
+  if (!key) {
+    key = prompt("Please enter your OpenWeatherMap API Key (it will be saved locally in your browser):");
+    if (key) {
+      key = key.trim();
+      localStorage.setItem("openweather_api_key", key);
+    }
+  }
+  return key || "";
+}
+
+const apiKey = getApiKey();
 const apiBaseUrl = "https://api.openweathermap.org/data/2.5/weather?units=metric";
 
 // 2. Select HTML Elements
@@ -276,12 +288,20 @@ clearHistoryBtn.addEventListener("click", () => {
 
 async function checkWeather(city) {
   hideError();
+  if (!apiKey) {
+    showError("API Key is missing. Please reload the page to enter your OpenWeatherMap API Key.");
+    return;
+  }
   const url = `${apiBaseUrl}&q=${encodeURIComponent(city)}&appid=${apiKey}`;
   await fetchWeatherData(url);
 }
 
 async function checkWeatherByCoords(lat, lon) {
   hideError();
+  if (!apiKey) {
+    showError("API Key is missing. Please reload the page to enter your OpenWeatherMap API Key.");
+    return;
+  }
   const url = `${apiBaseUrl}&lat=${lat}&lon=${lon}&appid=${apiKey}`;
   await fetchWeatherData(url);
 }
@@ -290,7 +310,12 @@ async function fetchWeatherData(url) {
   try {
     const response = await fetch(url);
     if (!response.ok) {
-      showError();
+      if (response.status === 401) {
+        localStorage.removeItem("openweather_api_key");
+        showError("Invalid API Key. Clearing saved key. Please reload page and check your key.");
+      } else {
+        showError();
+      }
       return;
     }
     
